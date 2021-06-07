@@ -24,11 +24,14 @@ const client = backtest.data_ws;
 client.onConnect(() => {
   console.log("opened backtest");
   client.subscribe(['AM.SPY']);
+  setTimeout(()=>client.disconnect(), 600 * 1000);
 });
 
-//if the 50 and 200 ema cross over each other, set a variable to long or short
+client.onDisconnect(()=>{
+  console.log(backtest.getStats());
+});
 
-//if Long, and the price drops below the 50, but above the 200:
-// if the next candle closes above the 50, go long
 
-client.disconnect();
+//for some reason, it seems this must be called last
+client.connect();
+
