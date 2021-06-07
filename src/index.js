@@ -1,5 +1,6 @@
 //require('dotenv').config(); // dotenv uses a seperate file to keep PI keys in
-require("technicalindicators"); //library for indicators
+const EMA = require("technicalindicators").EMA; //library for indicators
+const _ = require('lodash');//for mapping objects to arrays
 
 const Alpaca = require("@alpacahq/alpaca-trade-api"); // get alpaca API
 const Backtest = require("@kendelchopp/alpaca-js-backtesting");
@@ -18,6 +19,30 @@ const backtest = new Backtest({
   startDate: new Date(2015, 1, 1, 0, 0),
   endDate: new Date(2021, 1, 1, 0, 0)
 });
+
+let ema50, ema200;
+
+//setup the exponential moving averages
+async function initializeAverages() {
+  const initialData = await alpaca.getBars(
+    '1Min',
+    'SPY',
+    {
+      limit: 200,
+      until: new Date()
+    }
+  );
+
+  const closeValues = _.map(initialData.SPY, (bar) => bar.closePrice);
+
+  ema50 = new EMA({ period: 50, values: closeValues });
+  ema200 = new EMA({ period: 200, values: closeValues });
+
+  console.log(`sma20: ${ema50.getResult()}`);
+  console.log(`sma50: ${ema200.getResult()}`);
+}
+
+initializeAverages();
 
 //open stream
 const client = backtest.data_ws;
