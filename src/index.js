@@ -1,6 +1,6 @@
 //require('dotenv').config(); // dotenv uses a seperate file to keep PI keys in
 const EMA = require("technicalindicators").EMA; //library for indicators
-const _ = require('lodash');//for mapping objects to arrays
+const _ = require("lodash"); //for mapping objects to arrays
 
 const Alpaca = require("@alpacahq/alpaca-trade-api"); // get alpaca API
 const Backtest = require("@kendelchopp/alpaca-js-backtesting");
@@ -24,39 +24,39 @@ let ema50, ema200;
 
 //setup the exponential moving averages
 async function initializeAverages() {
-  const initialData = await alpaca.getBars(
-    '1Min',
-    'SPY',
-    {
-      limit: 200,
-      until: new Date()
-    }
-  );
+  const initialData = await alpaca.getBars("1Min", "TSLA", {
+    limit: 200,
+    until: new Date()
+  });
 
-  const closeValues = _.map(initialData.SPY, (bar) => bar.closePrice);
+  const closeValues = _.map(initialData.TSLA, (bar) => bar.closePrice);
 
   ema50 = new EMA({ period: 50, values: closeValues });
   ema200 = new EMA({ period: 200, values: closeValues });
 
-  console.log(`sma20: ${ema50.getResult()}`);
-  console.log(`sma50: ${ema200.getResult()}`);
+  console.log(`ema50: ${ema50.getResult()}`);
+  console.log(`ema200: ${ema200.getResult()}`);
 }
 
 initializeAverages();
 
 //open stream
-const client = backtest.data_ws;
+let client = backtest.data_ws;
+
 client.onConnect(() => {
   console.log("opened backtest");
-  client.subscribe(['AM.SPY']);
-  setTimeout(()=>client.disconnect(), 600 * 1000);
+  client.subscribe(["AM.TSLA"]);
+  //setTimeout(() =>  client.disconnect(), 1000);
 });
 
-client.onDisconnect(()=>{
+client.onDisconnect(() => {
   console.log(backtest.getStats());
 });
 
+client.onStockAggMin((subject, data) => {
+  console.log(subject);
+  console.log(data);
+});
 
 //for some reason, it seems this must be called last
 client.connect();
-
