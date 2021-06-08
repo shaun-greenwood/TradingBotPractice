@@ -24,8 +24,8 @@ const alpaca = new Alpaca({
 //create instance of back tester on alpaca using Kendel Chopp's code
 const backtest = new Backtest({
   alpaca,
-  startDate: new Date(2019, 1, 1, 0, 0, 0),
-  endDate: new Date(2020, 1, 1, 0, 0, 0)
+  startDate: new Date(2020, 0, 0),
+  endDate: new Date(2020, 0, 3)
 });
 
 let ema50, ema200;
@@ -61,7 +61,7 @@ let client = backtest.data_ws;
 
 client.onConnect(() => {
   console.log("opened backtest");
-  client.subscribe(["alpacadatav1/AM."+symbol]);
+  client.subscribe(["AM."+symbol]);
 
   //the back testing library does not contain a disconnect method
   //setTimeout(() =>  client.disconnect(), 1000);
@@ -75,8 +75,10 @@ client.onDisconnect(() => {
 //this code will run everytme a 1 min candle is formed
 client.onStockAggMin((subject, data) => {
   //debug counter
-  console.log('counter: ' + i + ', timestamp for candle: ' + data.startEpochTime);
-;
+  console.log('counter: ' + i + ', timestamp for candle: ' + data.startEpochTime + ', subject: ' + subject);
+  console.log(client._startDate);
+  console.log(client._endDate);
+
   //store the closing price of the last bar.
   const nextValue = data.closePrice;
 
